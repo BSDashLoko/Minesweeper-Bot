@@ -8,4 +8,6 @@
  G to pause
  X to exit
  
- Sometimes it willl either fail at the start when it clicks 3 spots or when its logic isn't sufficient and it goes for luck by clicking a random green spot and analysing the board.
+ Sometimes it will either fail at the start when it clicks 3 spots or when its logic isn't sufficient and it goes for luck by clicking a random green spot and analysing the board.
+
+Youtube video demonstrating the application: https://www.youtube.com/watch?v=axMwU9gabRE
