@@ -13,7 +13,7 @@ import random
 #X finishes the program
 
 #Minesweeper coordinates MAKE SURE TO CHANGE IT TO YOUR CONFIGURATION
-mon = {'left': 793, 'top': 243, 'width': 600, 'height': 500}
+mon = {'left': 801, 'top': 250, 'width': 600, 'height': 500}
 
 #variables later used
 vai = 0
@@ -166,7 +166,7 @@ def processImg(img):
             iC = i*25
             jC = j*25
             croppedPixel = img[iC+11, jC+13] #alling to specif pixel of a tile
-            if grid[i][j] != "flag":
+            if grid[i][j] != "flag" and grid[i][j] != "used":
                 grid[i][j] = getTile(croppedPixel)
 
     clicked = False
@@ -187,12 +187,15 @@ def processImg(img):
                     clickAdjacent(indices, gridCoords, 'right')
                     vai = 1
                     clicked = True
+                    grid[i][j] = "used"
 
-                if num - numFlag == 0 and numGreen != 0:
+                elif num - numFlag == 0 and numGreen != 0:
                     indices = [i for i, x in enumerate(adjacent) if x == "green"]
                     clickAdjacent(indices, gridCoords, 'left')
                     vai = 1
                     clicked = True
+                    grid[i][j] = "used"
+
 
     return 1,clicked
         
@@ -238,9 +241,9 @@ with mss() as sct:
         
         #clicks 3 spots at the start of the game CHANGE ITS COORDINATES IF YOU WANT TO REPLICATE ON YOUR MACHINE
         if firstTime:
-            pyautogui.click(920, 350)
-            pyautogui.click(1250, 630)
-            pyautogui.click(1100, 500)
+            pyautogui.click(1116, 486)
+            #pyautogui.click(912, 359)
+            #pyautogui.click(1265, 364)
     
 
         if vai == 1:
