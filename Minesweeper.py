@@ -250,8 +250,8 @@ with mss() as sct:
         
         #clicks 3 spots at the start of the game
         if firstTime:
-            click_mouse(912, 359, "left")
-            click_mouse(1265, 364, "left")
+            #click_mouse(912, 359, "left")
+            #click_mouse(1265, 364, "left")
             click_mouse(1116, 520, "left")
     
 
