@@ -2,23 +2,24 @@ import numpy as np
 import cv2
 from mss import mss
 from PIL import Image
-import pyautogui
 import time
 import keyboard
 import math
 import random
+import mouse
 
 #F for starting the bot
 #G for pausing it (if the automatic pause doesn't reset the board)
 #X finishes the program
 
-#Minesweeper coordinates MAKE SURE TO CHANGE IT TO YOUR CONFIGURATION
+#Minesweeper coordinates specific for monitor config
 mon = {'left': 801, 'top': 250, 'width': 600, 'height': 500}
 
 #variables later used
 vai = 0
 firstTime = False
 clicked = False
+frames = 0
 
 #grid list to store tile values
 rows, cols = (20, 24)
@@ -130,6 +131,11 @@ def getAdjacent(arr, i, j):
     # Returning the vector
     return v
 
+#clicking function
+def click_mouse(x, y, button):
+    mouse.move(x, y, absolute=True)
+    mouse.click(button=button)
+
 
 #clicking adjacent tiles based on logic and tile value
 def clickAdjacent(indices, gridCoords, click):
@@ -144,7 +150,7 @@ def clickAdjacent(indices, gridCoords, click):
         7: [1, 1],
     }
 
-    coords = [gridCoords[0]*25+805, gridCoords[1]*25+255] #adds monitor left and right paddings, plus 12 and multiplies by tile resolution, 25x25
+    coords = [gridCoords[0]*25+801+12, gridCoords[1]*25+250+12] #adds monitor left and right paddings, plus 12 and multiplies by tile resolution, 25x25
 
     for i in indices:
         adjacentTiles = switcherCoords.get(i, "nothing")
@@ -155,7 +161,7 @@ def clickAdjacent(indices, gridCoords, click):
             grid[gridCoords[1]+adjacentTiles[1]][gridCoords[0]+adjacentTiles[0]] = "flag"
         else:
             grid[gridCoords[1]+adjacentTiles[1]][gridCoords[0]+adjacentTiles[0]] = "blank"
-            pyautogui.click(coords[0]+relCoords[0], coords[1]+relCoords[1], button=click)
+            click_mouse(coords[0]+relCoords[0], coords[1]+relCoords[1], click)
 
 
 
@@ -185,14 +191,14 @@ def processImg(img):
                 if num == numFlag:
                     grid[i][j] = "used"
 
-                elif num - numFlag == numGreen and numGreen != 0:
+                if num - numFlag == numGreen and numGreen != 0:
                     indices = [i for i, x in enumerate(adjacent) if x == "green"]
                     clickAdjacent(indices, gridCoords, 'right')
                     vai = 1
                     clicked = True
                     grid[i][j] = "used"
 
-                elif num - numFlag == 0 and numGreen != 0:
+                if num - numFlag == 0 and numGreen != 0:
                     indices = [i for i, x in enumerate(adjacent) if x == "green"]
                     clickAdjacent(indices, gridCoords, 'left')
                     vai = 1
@@ -232,7 +238,7 @@ with mss() as sct:
             print("paused")
             grid = [[0 for i in range(24)] for j in range(20)]
             firstTime = False
-            pyautogui.click(1000, 580)
+            mouse.move(1000, 580, absolute=True)
 
 
         #finishes the program
@@ -242,15 +248,15 @@ with mss() as sct:
             break
 
         
-        #clicks 3 spots at the start of the game CHANGE ITS COORDINATES IF YOU WANT TO REPLICATE ON YOUR MACHINE
+        #clicks 3 spots at the start of the game
         if firstTime:
-            pyautogui.click(1116, 486)
-            #pyautogui.click(912, 359)
-            #pyautogui.click(1265, 364)
+            click_mouse(912, 359, "left")
+            click_mouse(1265, 364, "left")
+            click_mouse(1116, 520, "left")
     
 
         if vai == 1:
-            pyautogui.moveTo(795,230)
+            mouse.move(795,230, absolute=True)
 
             #getting the screenshot as an image
             screenShot = sct.grab(mon)
@@ -266,14 +272,24 @@ with mss() as sct:
             clicked = True
 
 
-        #clicks a random green tile when its logic isn't sufficient
+        if clicked:
+            frames = 0
+
+
+        #clicks a random green tile when its logic isn't sufficient (10 frames without clicking)
         if clicked == False and vai == 1 and firstTime == False:
-            try:
-                i,j = random.choice(indexList_2d(grid, "green"))
-                pyautogui.click(j*25+805, i*25+255)
-                print("clicked random")
-            except:
-                print("Finished the Minesweeper")
-                vai = 0
-                grid = [[0 for i in range(24)] for j in range(20)]
-                firstTime = False
+
+            if frames >= 10:
+                try:
+                    i,j = random.choice(indexList_2d(grid, "green"))
+                    click_mouse(j*25+801+12, i*25+250+12,"left")
+                    clicked = True
+                    frames = 0
+                    print("clicked random")
+                except:
+                    print("Finished the Minesweeper")
+                    vai = 0
+                    grid = [[0 for i in range(24)] for j in range(20)]
+                    firstTime = False
+
+            frames+=1
