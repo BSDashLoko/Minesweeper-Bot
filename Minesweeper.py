@@ -276,10 +276,10 @@ with mss() as sct:
             frames = 0
 
 
-        #clicks a random green tile when its logic isn't sufficient (10 frames without clicking)
+        #clicks a random green tile when its logic isn't sufficient (15 frames without clicking)
         if clicked == False and vai == 1 and firstTime == False:
 
-            if frames >= 10:
+            if frames >= 15:
                 try:
                     i,j = random.choice(indexList_2d(grid, "green"))
                     click_mouse(j*25+801+12, i*25+250+12,"left")
