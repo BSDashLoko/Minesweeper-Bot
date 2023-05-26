@@ -162,7 +162,7 @@ def clickAdjacent(indices, gridCoords, click):
         else:
             grid[gridCoords[1]+adjacentTiles[1]][gridCoords[0]+adjacentTiles[0]] = "blank"
             click_mouse(coords[0]+relCoords[0], coords[1]+relCoords[1], click)
-
+            print("clicked", gridCoords[1]+adjacentTiles[1],gridCoords[0]+adjacentTiles[0])
 
 
 #Sees the board and applies basic minesweeper logic to it, calling click function
@@ -276,10 +276,10 @@ with mss() as sct:
             frames = 0
 
 
-        #clicks a random green tile when its logic isn't sufficient (15 frames without clicking)
+        #clicks a random green tile when its logic isn't sufficient (10 frames without clicking)
         if clicked == False and vai == 1 and firstTime == False:
 
-            if frames >= 15:
+            if frames >= 10:
                 try:
                     i,j = random.choice(indexList_2d(grid, "green"))
                     click_mouse(j*25+801+12, i*25+250+12,"left")
