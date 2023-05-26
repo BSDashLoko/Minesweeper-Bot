@@ -181,8 +181,11 @@ def processImg(img):
                 num = int(tile[-1:])
                 numGreen = adjacent.count("green")
                 numFlag = adjacent.count("flag")
+                
+                if num == numFlag:
+                    grid[i][j] = "used"
 
-                if num - numFlag == numGreen and numGreen != 0:
+                elif num - numFlag == numGreen and numGreen != 0:
                     indices = [i for i, x in enumerate(adjacent) if x == "green"]
                     clickAdjacent(indices, gridCoords, 'right')
                     vai = 1
