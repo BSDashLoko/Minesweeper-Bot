@@ -159,10 +159,12 @@ def clickAdjacent(indices, gridCoords, click):
 
         if click == 'right':
             grid[gridCoords[1]+adjacentTiles[1]][gridCoords[0]+adjacentTiles[0]] = "flag"
+            #click_mouse(coords[0]+relCoords[0], coords[1]+relCoords[1], click)
+            #print("flag", gridCoords[1]+adjacentTiles[1],gridCoords[0]+adjacentTiles[0])
         else:
             grid[gridCoords[1]+adjacentTiles[1]][gridCoords[0]+adjacentTiles[0]] = "blank"
             click_mouse(coords[0]+relCoords[0], coords[1]+relCoords[1], click)
-            print("clicked", gridCoords[1]+adjacentTiles[1],gridCoords[0]+adjacentTiles[0])
+            #print("clicked", gridCoords[1]+adjacentTiles[1],gridCoords[0]+adjacentTiles[0])
 
 
 #Sees the board and applies basic minesweeper logic to it, calling click function
@@ -207,7 +209,112 @@ def processImg(img):
 
 
     return 1,clicked
-        
+
+
+
+
+#applies logic with 2 tiles at a time
+def processAdv(img):
+
+    for i in range(20):
+        for j in range(24):
+            iC = i*25
+            jC = j*25
+            croppedPixel = img[iC+11, jC+13] #alling to specif pixel of a tile
+            if grid[i][j] != "flag" and grid[i][j] != "used":
+                grid[i][j] = getTile(croppedPixel)
+
+
+    possibleBombsComplete = []
+    numbers = []
+
+    switcherCoords = {
+        0: [-1, -1],
+        1: [-1, 0],
+        2: [-1, 1],
+        3: [0, -1],
+        4: [0, 1],
+        5: [1, -1],
+        6: [1, 0],
+        7: [1, 1],
+    }
+
+    for i in range(20):
+        for j in range(24):
+            tile = grid[i][j]
+            possibleBombs = []
+
+            if tile.startswith("num"):
+                adjacent = getAdjacent(grid, i, j)
+                num = int(tile[-1:])
+                numFlag = adjacent.count("flag")
+
+
+                indices = [i for i, x in enumerate(adjacent) if x == "green"]
+                
+
+                for relative in indices:
+                    relativeCoords = switcherCoords.get(relative, "nothing")
+                    possibleBombs.append([i+relativeCoords[0],j+relativeCoords[1]])
+                    
+                possibleBombsComplete.append(possibleBombs)
+                numbers.append(num-numFlag)
+
+    
+    for iBomb in range(len(possibleBombsComplete)):
+        for iBomb2 in range(iBomb+1,len(possibleBombsComplete)):
+            first = possibleBombsComplete[iBomb]
+            second = possibleBombsComplete[iBomb2]
+
+            sub = False
+
+            if(all(x in first for x in second)):
+
+                diff = [lst for lst in first if lst not in second]
+                one = first
+                two = second
+
+                iOne = iBomb
+                iTwo = iBomb2
+                sub = True
+
+            elif(all(x in second for x in first)):
+                diff = [lst for lst in second if lst not in first]
+                one = second
+                two = first
+
+                iOne = iBomb2
+                iTwo = iBomb
+                sub = True
+
+
+            if sub:
+                if len(diff) > 0:
+                    vai = 1
+                    clicked = True
+
+                    #print("diff",diff)
+
+                    if numbers[iBomb] == numbers[iBomb2]:
+
+                        for d in diff:
+                            grid[d[0]][d[1]] = "blank"
+                            click_mouse(d[1]*25+801+12, d[0]*25+250+12, "left")
+                            #print("clicked adv", d[0],d[1])
+                            
+                    elif numbers[iBomb] - numbers[iBomb2] == len(diff):
+                        for d in diff:
+                            grid[d[0]][d[1]] = "flag"
+                            #click_mouse(d[1]*25+801+12, d[0]*25+250+12, "right")
+                            #print("flag adv", d[0],d[1])
+
+            
+    
+    return 1
+
+
+
+
 
 #Get the indexes of a specifi element in a 2D List
 def indexList_2d(myList, v):
@@ -250,9 +357,11 @@ with mss() as sct:
         
         #clicks 3 spots at the start of the game
         if firstTime:
+            click_mouse(1116, 520, "left")
             #click_mouse(912, 359, "left")
             #click_mouse(1265, 364, "left")
-            click_mouse(1116, 520, "left")
+            clicked = True
+            
     
 
         if vai == 1:
@@ -264,22 +373,17 @@ with mss() as sct:
             img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
 
             vai, clicked = processImg(img)
-
-
-
-        if firstTime:
-            firstTime = False
-            clicked = True
+            processAdv(img)
 
 
         if clicked:
             frames = 0
 
 
-        #clicks a random green tile when its logic isn't sufficient (10 frames without clicking)
+        #clicks a random green tile when its logic isn't sufficient (8 frames without clicking)
         if clicked == False and vai == 1 and firstTime == False:
 
-            if frames >= 10:
+            if frames >= 8:
                 try:
                     i,j = random.choice(indexList_2d(grid, "green"))
                     click_mouse(j*25+801+12, i*25+250+12,"left")
@@ -293,3 +397,6 @@ with mss() as sct:
                     firstTime = False
 
             frames+=1
+
+
+        firstTime = False
