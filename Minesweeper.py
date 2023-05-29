@@ -13,7 +13,16 @@ import mouse
 #X finishes the program
 
 #Minesweeper coordinates specific for monitor config
-mon = {'left': 801, 'top': 250, 'width': 600, 'height': 500}
+width = 600
+height = 500
+leftMargin = 801
+topMargin = 250
+tileSide = 25
+tileHalf = 12
+specificPixelI = 11
+specificPixelJ = 13
+
+mon = {'left': leftMargin, 'top': topMargin, 'width': width, 'height': height}
 
 #variables later used
 vai = 0
@@ -150,12 +159,12 @@ def clickAdjacent(indices, gridCoords, click):
         7: [1, 1],
     }
 
-    coords = [gridCoords[0]*25+801+12, gridCoords[1]*25+250+12] #adds monitor left and right paddings, plus 12 and multiplies by tile resolution, 25x25
+    coords = [gridCoords[0]*tileSide+leftMargin+tileHalf, gridCoords[1]*tileSide+topMargin+tileHalf] #adds monitor left and right margins, plus half of a tile and multiplies by tile resolution
 
     for i in indices:
         adjacentTiles = switcherCoords.get(i, "nothing")
 
-        relCoords = [i * 25 for i in adjacentTiles]
+        relCoords = [i * tileSide for i in adjacentTiles]
 
         if click == 'right':
             grid[gridCoords[1]+adjacentTiles[1]][gridCoords[0]+adjacentTiles[0]] = "flag"
@@ -173,7 +182,7 @@ def processImg(img):
         for j in range(24):
             iC = i*25
             jC = j*25
-            croppedPixel = img[iC+11, jC+13] #alling to specif pixel of a tile
+            croppedPixel = img[iC+specificPixelI, jC+specificPixelJ] #alling to specif pixel of a tile
             if grid[i][j] != "flag" and grid[i][j] != "used":
                 grid[i][j] = getTile(croppedPixel)
 
@@ -220,7 +229,7 @@ def processAdv(img):
         for j in range(24):
             iC = i*25
             jC = j*25
-            croppedPixel = img[iC+11, jC+13] #alling to specif pixel of a tile
+            croppedPixel = img[iC+specificPixelI, jC+specificPixelJ] #alling to specif pixel of a tile
             if grid[i][j] != "flag" and grid[i][j] != "used":
                 grid[i][j] = getTile(croppedPixel)
 
@@ -299,13 +308,13 @@ def processAdv(img):
 
                         for d in diff:
                             grid[d[0]][d[1]] = "blank"
-                            click_mouse(d[1]*25+801+12, d[0]*25+250+12, "left")
+                            click_mouse(d[1]*tileSide+leftMargin+tileHalf, d[0]*tileSide+topMargin+tileHalf, "left")
                             #print("clicked adv", d[0],d[1])
                             
                     elif numbers[iBomb] - numbers[iBomb2] == len(diff):
                         for d in diff:
                             grid[d[0]][d[1]] = "flag"
-                            #click_mouse(d[1]*25+801+12, d[0]*25+250+12, "right")
+                            #click_mouse(d[1]*tileSide+leftMargin+tileHalf, d[0]*tileSide+topMargin+tileHalf, "right")
                             #print("flag adv", d[0],d[1])
 
             
@@ -316,7 +325,7 @@ def processAdv(img):
 
 
 
-#Get the indexes of a specifi element in a 2D List
+#Get the indexes of a specific element in a 2D List
 def indexList_2d(myList, v):
     indices = []
     for idxI, i in enumerate(myList):
@@ -386,7 +395,7 @@ with mss() as sct:
             if frames >= 8:
                 try:
                     i,j = random.choice(indexList_2d(grid, "green"))
-                    click_mouse(j*25+801+12, i*25+250+12,"left")
+                    click_mouse(j*tileSide+leftMargin+tileHalf, i*tileSide+topMargin+tileHalf,"left")
                     clicked = True
                     frames = 0
                     print("clicked random")
