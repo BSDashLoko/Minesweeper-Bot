@@ -29,10 +29,11 @@ vai = 0
 firstTime = False
 clicked = False
 frames = 0
+waitFirst = False
 
 #grid list to store tile values
 rows, cols = (20, 24)
-backupGrid = grid = [[0 for i in range(cols)] for j in range(rows)]
+grid = [["green" for i in range(cols)] for j in range(rows)]
 
 
 #getting all stock tile pixel colors, it is the x=13 y=11 of each tile
@@ -346,14 +347,16 @@ with mss() as sct:
             vai = 1
             print("start")
             firstTime = True
+            waitFirst = True
 
 
         #Pauses the program
         if keyboard.is_pressed('g') or vai == 2: 
             vai = 0
             print("paused")
-            grid = [[0 for i in range(24)] for j in range(20)]
+            grid = [["green" for i in range(24)] for j in range(20)]
             firstTime = False
+            waitFirst = False
             mouse.move(1000, 580, absolute=True)
 
 
@@ -392,7 +395,11 @@ with mss() as sct:
         #clicks a random green tile when its logic isn't sufficient (12 frames without clicking)
         if clicked == False and vai == 1 and firstTime == False:
 
-            if frames >= 12:
+            if waitFirst == True and frames >= 6:
+                waitFirst = False
+                frames = 0
+
+            elif frames >= 12:
                 try:
                     i,j = random.choice(indexList_2d(grid, "green"))
                     click_mouse(j*tileSide+leftMargin+tileHalf, i*tileSide+topMargin+tileHalf,"left")
