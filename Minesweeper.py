@@ -15,8 +15,8 @@ import mouse
 #Minesweeper coordinates specific for monitor config
 width = 600
 height = 500
-leftMargin = 801
-topMargin = 250
+leftMargin = 1161
+topMargin = 341
 tileSide = 25
 tileHalf = 12
 specificPixelI = 11
@@ -42,10 +42,10 @@ blank2 = (153, 184, 215)
 green = (81, 215, 170)
 green2 = (73, 209, 162)
 num1 = (206, 124, 43)
-num2 = (76, 150, 84)
-num3 = (46, 46, 212)
+num2 = (76, 150, 83)
+num3 = (47, 47, 211)
 num4 = (162, 50, 138)
-num5 = (1, 144, 253)
+num5 = (0, 143, 255)
 num6 = (165, 153, 0)
 
 stockTiles = [blank, blank2, green, green2, num1, num2, num3, num4, num5, num6]
@@ -179,6 +179,9 @@ def clickAdjacent(indices, gridCoords, click):
 
 #Sees the board and applies basic minesweeper logic to it, calling click function
 def processImg(img):
+    global clicked
+    global vai
+
     for i in range(20):
         for j in range(24):
             iC = i*25
@@ -187,11 +190,12 @@ def processImg(img):
             if grid[i][j] != "flag" and grid[i][j] != "used":
                 grid[i][j] = getTile(croppedPixel)
 
-    clicked = False
+    if sum(row.count("nothing") for row in grid) >= 50:
+        vai = 2
+        return
 
     for i in range(20):
         for j in range(24):
-            if sum(row.count("nothing") for row in grid) >= 50:return 2,clicked
             tile = grid[i][j]
             if tile.startswith("num"):
                 adjacent = getAdjacent(grid, i, j)
@@ -200,31 +204,32 @@ def processImg(img):
                 numGreen = adjacent.count("green")
                 numFlag = adjacent.count("flag")
                 
-                if num == numFlag:
-                    grid[i][j] = "used"
 
-                if num - numFlag == numGreen and numGreen != 0:
+                if numGreen == 0:
+                    grid[i][j] = "used"
+                    continue
+
+
+                if num - numFlag == numGreen:
                     indices = [i for i, x in enumerate(adjacent) if x == "green"]
                     clickAdjacent(indices, gridCoords, 'right')
-                    vai = 1
                     clicked = True
                     grid[i][j] = "used"
 
-                if num - numFlag == 0 and numGreen != 0:
+                if num - numFlag == 0:
                     indices = [i for i, x in enumerate(adjacent) if x == "green"]
                     clickAdjacent(indices, gridCoords, 'left')
-                    vai = 1
                     clicked = True
                     grid[i][j] = "used"
 
 
-    return 1,clicked
 
 
 
 
 #applies logic with 2 tiles at a time
 def processAdv(img):
+    global clicked
 
     for i in range(20):
         for j in range(24):
@@ -270,7 +275,7 @@ def processAdv(img):
                 possibleBombsComplete.append(possibleBombs)
                 numbers.append(num-numFlag)
 
-    
+
     for iBomb in range(len(possibleBombsComplete)):
         for iBomb2 in range(iBomb+1,len(possibleBombsComplete)):
             first = possibleBombsComplete[iBomb]
@@ -300,19 +305,18 @@ def processAdv(img):
 
             if sub:
                 if len(diff) > 0:
-                    vai = 1
-                    clicked = True
 
                     #print("diff",diff)
 
                     if numbers[iBomb] == numbers[iBomb2]:
-
+                        clicked = True
                         for d in diff:
                             grid[d[0]][d[1]] = "blank"
                             click_mouse(d[1]*tileSide+leftMargin+tileHalf, d[0]*tileSide+topMargin+tileHalf, "left")
-                            #print("clicked adv", d[0],d[1])
+                            print("clicked adv", d[0],d[1])
                             
                     elif numbers[iBomb] - numbers[iBomb2] == len(diff):
+                        clicked = True
                         for d in diff:
                             grid[d[0]][d[1]] = "flag"
                             #click_mouse(d[1]*tileSide+leftMargin+tileHalf, d[0]*tileSide+topMargin+tileHalf, "right")
@@ -320,7 +324,6 @@ def processAdv(img):
 
             
     
-    return 1
 
 
 
@@ -369,9 +372,9 @@ with mss() as sct:
         
         #clicks 3 spots at the start of the game
         if firstTime:
-            click_mouse(1116, 520, "left")
-            #click_mouse(912, 359, "left")
-            #click_mouse(1265, 364, "left")
+            click_mouse(1425, 620, "left")
+            click_mouse(1250, 400, "left")
+            click_mouse(1650, 780, "left")
             clicked = True
             
     
@@ -383,9 +386,17 @@ with mss() as sct:
             screenShot = sct.grab(mon)
             img = np.array(screenShot)
             img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+            
+            clicked = False
 
-            vai, clicked = processImg(img)
+            processImg(img)
             processAdv(img)
+
+            #print("\n\nTABULEIRO:")
+            #for i in range(20):
+            #    for j in range(24):
+            #        print(grid[i][j],end=" ")
+            #    print()
 
 
         if clicked:
